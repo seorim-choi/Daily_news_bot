@@ -1,8 +1,8 @@
 name: Daily News Briefing
 on:
   schedule:
-    - cron: '0 0 * * *' # UTC 00:00은 한국 시간 오전 9:00입니다.
-  workflow_dispatch: # 직접 실행해볼 수 있는 버튼을 만듭니다.
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
