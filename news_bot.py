@@ -23,14 +23,13 @@ def get_news():
     return news_text
 
 async def main():
-    # 1. Gemini 요약 (모델 명칭을 최신 안정화 버전으로 변경)
+    # 1. Gemini 요약 (가장 표준적인 모델 이름으로 수정)
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('models/gemini-1.5-flash-latest') # 👈 명칭 수정됨
+    model = genai.GenerativeModel('gemini-1.5-flash') # 👈 이 부분을 수정했습니다.
     
     raw_news = get_news()
     prompt = f"투자 전문가로서 다음 뉴스들을 섹션별로 요약하고 투자 인사이트를 알려줘:\n\n{raw_news}"
     
-    # 예외 처리 추가 (에러 발생 시 확인용)
     try:
         response = model.generate_content(prompt)
         content = response.text
