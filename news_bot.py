@@ -23,18 +23,21 @@ def get_news():
     return news_text
 
 async def main():
-    # 1. Gemini 요약 (가장 표준적인 모델 이름으로 수정)
+    # 1. Gemini 설정 (안전한 버전으로 강제 지정)
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash') # 👈 이 부분을 수정했습니다.
+    
+    # 여러 이름 중 가장 범용적인 이름을 시도합니다.
+    model_name = 'gemini-pro' # 👈 flash 대신 더 안정적인 pro로 잠시 바꿔봅시다.
+    model = genai.GenerativeModel(model_name)
     
     raw_news = get_news()
-    prompt = f"투자 전문가로서 다음 뉴스들을 섹션별로 요약하고 투자 인사이트를 알려줘:\n\n{raw_news}"
+    prompt = f"투자 전문가로서 다음 뉴스들을 요약하고 투자 포인트 알려줘:\n\n{raw_news}"
     
     try:
         response = model.generate_content(prompt)
         content = response.text
     except Exception as e:
-        content = f"요약 중 에러가 발생했습니다: {str(e)}"
+        content = f"모델 '{model_name}' 호출 실패. 다시 시도해볼게요. 에러: {str(e)}"
     
     # 2. 텔레그램 전송
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
