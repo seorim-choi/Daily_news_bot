@@ -1,5 +1,6 @@
 import feedparser
 import google.generativeai as genai
+from google.generativeai.types import RequestOptions # 설정 옵션 추가
 import telegram
 import asyncio
 import os
@@ -23,21 +24,24 @@ def get_news():
     return news_text
 
 async def main():
-    # 1. Gemini 설정 (안전한 버전으로 강제 지정)
+    # 1. Gemini 설정 (API 버전을 v1으로 강제 고정하여 404 에러 차단)
     genai.configure(api_key=GEMINI_API_KEY)
     
-    # 여러 이름 중 가장 범용적인 이름을 시도합니다.
-    model_name = 'gemini-pro' # 👈 flash 대신 더 안정적인 pro로 잠시 바꿔봅시다.
-    model = genai.GenerativeModel(model_name)
+    # 가장 대중적인 gemini-1.5-flash를 사용하되, 경로 설정을 보강합니다.
+    model = genai.GenerativeModel('gemini-1.5-flash')
     
     raw_news = get_news()
-    prompt = f"투자 전문가로서 다음 뉴스들을 요약하고 투자 포인트 알려줘:\n\n{raw_news}"
+    prompt = f"투자 비서로서 다음 뉴스를 섹션별로 요약하고 투자 시사점을 알려줘:\n\n{raw_news}"
     
     try:
-        response = model.generate_content(prompt)
+        # v1 버전을 사용하도록 명시적으로 요청 옵션을 넣습니다.
+        response = model.generate_content(
+            prompt,
+            request_options=RequestOptions(api_version='v1') # 👈 핵심 해결책
+        )
         content = response.text
     except Exception as e:
-        content = f"모델 '{model_name}' 호출 실패. 다시 시도해볼게요. 에러: {str(e)}"
+        content = f"최종 시도 실패. 에러 내용: {str(e)}"
     
     # 2. 텔레그램 전송
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
